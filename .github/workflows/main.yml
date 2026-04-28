@@ -29,13 +29,24 @@ jobs:
       - name: List downloaded files
         run: |
           echo "Contents of penguin folder:"
-          ls -la penguin/ || echo "penguin folder not found!"
+          ls -la penguin/
+          echo "Number of files: $(find penguin -type f | wc -l)"
+
+      - name: Check if folder is not empty
+        run: |
+          if [ -z "$(ls -A penguin)" ]; then
+            echo "Error: penguin folder is empty!"
+            exit 1
+          else
+            echo "penguin folder has content, proceeding to commit."
+          fi
 
       - name: Commit and Push
         run: |
           git config user.name "github-actions[bot]"
-          git config.user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add penguin
+          git status
           git commit -m "Add folder from IPFS" || echo "No changes to commit"
           git push
         env:
