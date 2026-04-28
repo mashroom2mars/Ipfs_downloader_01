@@ -1,40 +1,30 @@
-name: "Fetch from IPFS and Commit22"
+name: "Fetch IPFS Folder as CAR File"
 
 on:
   workflow_dispatch:
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
-  fetch-and-commit:
+  fetch-ipfs-folder:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # دسترسی نوشتن در مخزن
-
+      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Clean up previous download (if any)
-        run: rm -rf penguin
-
-      - name: Install wget
-        run: sudo apt-get update && sudo apt-get install -y wget
-
-      - name: Download folder from IPFS
+      - name: Download the entire folder as a single CAR file
         run: |
-          wget -r -np -nH --cut-dirs=3 -R "index.html*" "https://ipfs.io/ipfs/QmNf1UsmdGaMbpatQ6toXSkzDpizaGmC9zfunCyoz1enD5/penguin/"
+          echo "Downloading the IPFS folder as a CAR file..."
+          curl -L -o penguin_folder.car "https://ipfs.io/ipfs/QmNf1UsmdGaMbpatQ6toXSkzDpizaGmC9zfunCyoz1enD5?format=car"
+          echo "Download completed. File info:"
+          ls -lh penguin_folder.car
 
-      - name: List downloaded files (for debugging)
-        run: ls -la penguin/
-
-      - name: Commit and Push
+      - name: Commit and Push the CAR file to GitHub
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add penguin
-          git commit -m "Add folder from IPFS" || echo "No changes to commit"
+          git add penguin_folder.car
+          git commit -m "Add IPFS folder as a CAR file" || echo "No changes to commit"
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
