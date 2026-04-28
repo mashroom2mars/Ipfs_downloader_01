@@ -1,28 +1,35 @@
-name: "Fetch from IPFS and Commit 01"
+name: "Fetch from IPFS and Commit"
 
 on:
   workflow_dispatch:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   fetch-and-commit:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Download file from IPFS
-        run: |
-          # لینک IPFS
-          IPFS_URL="https://ipfs.io/ipfs/QmNf1UsmdGaMbpatQ6toXSkzDpizaGmC9zfunCyoz1enD5/penguin/"
-          curl -L "$IPFS_URL" -o downloaded_file.png
+      - name: Install wget (if not present)
+        run: sudo apt-get update && sudo apt-get install -y wget
 
-                - name: Commit and Push
+      - name: Download folder from IPFS
+        run: |
+          IPFS_URL="https://ipfs.io/ipfs/QmNf1UsmdGaMbpatQ6toXSkzDpizaGmC9zfunCyoz1enD5/penguin/"
+          wget -r -np -nH --cut-dirs=5 -R "index.html*" "$IPFS_URL"
+
+      - name: Commit and Push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add downloaded_file.zip
-          git commit -m "Add file from IPFS" || echo "No changes"
+          git add penguin/
+          git commit -m "Add folder from IPFS" || echo "No changes to commit"
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
