@@ -1,0 +1,40 @@
+name: "Fetch from IPFS and Commit22"
+
+on:
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  fetch-and-commit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # دسترسی نوشتن در مخزن
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Clean up previous download (if any)
+        run: rm -rf penguin
+
+      - name: Install wget
+        run: sudo apt-get update && sudo apt-get install -y wget
+
+      - name: Download folder from IPFS
+        run: |
+          wget -r -np -nH --cut-dirs=3 -R "index.html*" "https://ipfs.io/ipfs/QmNf1UsmdGaMbpatQ6toXSkzDpizaGmC9zfunCyoz1enD5/penguin/"
+
+      - name: List downloaded files (for debugging)
+        run: ls -la penguin/
+
+      - name: Commit and Push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add penguin
+          git commit -m "Add folder from IPFS" || echo "No changes to commit"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
