@@ -1,7 +1,7 @@
-name: "Fetch from IPFS and Commit"
+name: "Fetch from IPFS and Commit 01"
 
 on:
-  workflow_dispatch:   # یعنی فقط خودت با یک دکمه اجرا کن
+  workflow_dispatch:
 
 jobs:
   fetch-and-commit:
@@ -13,7 +13,7 @@ jobs:
 
       - name: Download file from IPFS
         run: |
-          # لینک IPFS شما
+          # لینک IPFS
           IPFS_URL="https://ipfs.io/ipfs/QmNf1UsmdGaMbpatQ6toXSkzDpizaGmC9zfunCyoz1enD5/penguin/"
           curl -L "$IPFS_URL" -o downloaded_file.png
 
