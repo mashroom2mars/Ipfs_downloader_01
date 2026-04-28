@@ -1,30 +1,33 @@
-name: "Fetch IPFS Folder as CAR File"
+name: "SIMPLE IPFS Downloader"
 
 on:
   workflow_dispatch:
 
 jobs:
-  fetch-ipfs-folder:
+  download-and-commit:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Download the entire folder as a single CAR file
+      - name: 1. Clean & Checkout
         run: |
-          echo "Downloading the IPFS folder as a CAR file..."
-          curl -L -o penguin_folder.car "https://ipfs.io/ipfs/QmNf1UsmdGaMbpatQ6toXSkzDpizaGmC9zfunCyoz1enD5?format=car"
-          echo "Download completed. File info:"
-          ls -lh penguin_folder.car
-
-      - name: Commit and Push the CAR file to GitHub
-        run: |
+          # پاک کردن همه چیز برای شروع تازه
+          rm -rf .git
+          git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git .
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add penguin_folder.car
-          git commit -m "Add IPFS folder as a CAR file" || echo "No changes to commit"
+
+      - name: 2. Download File with curl
+        run: |
+          echo "Downloading..."
+          curl -L -o mydownloadedfile "https://ipfs.io/ipfs/QmNf1UsmdGaMbpatQ6toXSkzDpizaGmC9zfunCyoz1enD5/penguin/"
+          echo "Download finished. File info:"
+          ls -la mydownloadedfile
+          file mydownloadedfile
+
+      - name: 3. Commit and Push
+        run: |
+          git add mydownloadedfile -f
+          git commit -m "Add downloaded file from IPFS" || echo "Nothing new to commit"
           git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
