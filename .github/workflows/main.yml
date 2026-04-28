@@ -1,13 +1,10 @@
-name: "Fetch from IPFS and Commit"
+name: "Fetch IPFS Folder as CAR File"
 
 on:
   workflow_dispatch:
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
-  fetch-and-commit:
+  fetch-ipfs-folder:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -15,25 +12,31 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Download entire folder as a zip file from IPFS
+      - name: Download the entire folder as a single CAR file
         run: |
-          echo "Downloading the IPFS folder as a single zip file..."
-          curl -L -o penguin_folder.zip "https://ipfs.io/ipfs/QmNf1UsmdGaMbpatQ6toXSkzDpizaGmC9zfunCyoz1enD5/penguin/?format=raw"
+          echo "Downloading the IPFS folder as a CAR file..."
+          curl -L -o penguin_folder.car "https://ipfs.io/ipfs/QmNf1UsmdGaMbpatQ6toXSkzDpizaGmC9zfunCyoz1enD5?format=car"
           echo "Download completed. File size:"
-          ls -lh penguin_folder.zip
+          ls -lh penguin_folder.car
 
-      - name: (Optional) Unzip to see contents (for debugging)
+      - name: Verify file exists and is not empty
         run: |
-          echo "Unzipping to check contents..."
-          unzip -l penguin_folder.zip || echo "File is not a zip archive, will commit as is."
+          if [ ! -s penguin_folder.car ]; then
+            echo "Error: File penguin_folder.car is empty or does not exist!"
+            exit 1
+          fi
+          echo "File verification passed."
 
-      - name: Commit and Push
+      - name: Commit and Push the CAR file to GitHub
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add penguin_folder.zip
-          git commit -m "Add IPFS folder as zip file" || echo "No changes to commit"
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git add penguin_folder.car
+          git status
+          git diff --cached --quiet || git commit -m "Add IPFS folder as a CAR file [skip ci]"
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
