@@ -16,9 +16,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Clean up previous download (if any)
-        run: |
-          rm -rf penguin
+      - name: Clean up previous download
+        run: rm -rf penguin
 
       - name: Install wget
         run: sudo apt-get update && sudo apt-get install -y wget
@@ -27,15 +26,15 @@ jobs:
         run: |
           wget -r -np -nH --cut-dirs=3 -R "index.html*" "https://ipfs.io/ipfs/QmNf1UsmdGaMbpatQ6toXSkzDpizaGmC9zfunCyoz1enD5/penguin/"
 
-      - name: List downloaded files (for debugging)
+      - name: List downloaded files
         run: |
-          echo "Contents of downloaded folder:"
-          ls -la penguin/ || echo "Folder 'penguin' not found!"
+          echo "Contents of penguin folder:"
+          ls -la penguin/ || echo "penguin folder not found!"
 
       - name: Commit and Push
         run: |
           git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config.user.email "github-actions[bot]@users.noreply.github.com"
           git add penguin
           git commit -m "Add folder from IPFS" || echo "No changes to commit"
           git push
